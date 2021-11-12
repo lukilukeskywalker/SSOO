@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 void insert_clave(char *clave);
 int contar_palabras(char *fichero);
@@ -7,23 +10,44 @@ long dividir(int divisor, char *fichero);
 
 
 int main(int argc, char * argv[]){
+  pid_t pid_hijo;
   int reventadores;
   long octeto_ini = 0;
-  long octeto_end;
-
+  char octeto_ini_char[20];
   sscanf(argv[3],"%d", &reventadores);
+  long octeto_end = 0;
+  char octeto_end_char[20];
 
-  if(argc == 6){
-    insert_clave(argv[1]);
-    for(int i = 1; i < reventadores; i++){
-      octeto_end = dividir(i * contar_palabras(argv[2])/reventadores, argv[2]);
+  fflush(NULL);
+  for (int j = 1; j <= reventadores+1; j++){
+
+  switch(pid_hijo = fork()){
+    case (pid_t)-1:
+      perror("error en fork");
+      exit(1);
+
+    case (pid_t)0:
+      octeto_end = dividir(j * contar_palabras(argv[2])/reventadores, argv[2]);
       printf("reventador words %ld %ld %s clave\n",octeto_ini, octeto_end, argv[1]);
-      octeto_ini = octeto_end + 1;
+      sprintf(octeto_ini_char,"%ld", octeto_ini);
+      sprintf(octeto_end_char,"%ld", octeto_end);
+      execl("/home/estudiante/j11j12a_g10_p2/reventador/reventador", "reventador", "/usr/share/dict/words",octeto_ini_char, octeto_end_char,argv[1], NULL);
+      perror("excel");
+      exit(1);
+
+    default:
+      if(argc){
+        insert_clave(argv[1]);
+      }else{
+        printf("Argumentos mal introducidos");
+      }
+
     }
-    printf("reventador words %ld %d %s clave\n",octeto_ini, contar_palabras(argv[2]), argv[1]);
-  }else{
-    printf("Argumentos mal introducidos");
+    octeto_end = dividir(j * contar_palabras(argv[2])/reventadores, argv[2]);
+    octeto_ini = octeto_end + 1;
   }
+
+
 }
 
 void insert_clave(char *clave){
@@ -54,6 +78,9 @@ int contar_palabras(char *fichero){
 }
 
 long dividir(int divisor, char *fichero){
+  if (divisor == 2493838){
+    return divisor;
+  }
   FILE *fich;
   fich = fopen(fichero, "r");
 
