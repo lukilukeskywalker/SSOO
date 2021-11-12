@@ -81,7 +81,7 @@ int main(int argc, char *argv[]){
     }
     //pos++;
   }
-  return 1;
+  exit(1);  //File not found! :(
 }
 int LoadConfig(int argc, char *argv[], struct Config *config){
   /*Esta funcion comprueba que todos los datos sean metidos

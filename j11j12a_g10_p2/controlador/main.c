@@ -11,12 +11,16 @@
 #else
 #define DEBUG_MSG(...)
 #endif
+#define LOCK_NAME "cont.lock"
+#define LOCK_TEST_TIMEOUT 5
+#define LOCK_RETRY_TRY 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
+#include <string.h>
 struct Config{
   char f_claves[256]; //Contains dictionary file
   char MD5key[33];  //Clave cifrada
@@ -30,13 +34,25 @@ struct Child_data{
 };
 struct Config config;
 struct Child_data *child;
+char *lock_name;
 void insert_clave(char *clave, char *fichero_salida);
 long file_length(char *file);
 long ret_next_line(char *file, long pos, long dict_size);
 void end_program(int state);
 int LoadConfig(int argc, char *argv[], struct Config *config);
+int lock_program(char *file, int timeout, int max_retry);
 void SIGCHLD_callback(int sig);
+static void termination(int signum);
 int main(int argc, char * argv[]){
+  if (signal(SIGTERM, termination)==SIG_ERR){
+    perror("[main] An error ocurred while setting the signal handler.\n");
+    exit(-1);
+  }
+  if(lock_program(argv[0], LOCK_TEST_TIMEOUT, LOCK_RETRY_TRY)){
+    fflush(stdout); //Ya sabemos que el fichero esta ahi. No necesitamos esa info.
+    perror("Program already being executed\n");
+    exit(1);
+  }
   LoadConfig(argc, &argv[0], &config);
   child=calloc(config.proc_reventador, sizeof(struct Child_data));
   long dict_size=file_length(config.f_claves);
@@ -77,7 +93,7 @@ int main(int argc, char * argv[]){
   //All kidos have been created. Now wait until they end
   //Data has been saved into child struct
   do{
-
+    sleep(60);
   }while(1);
 }
 
@@ -85,7 +101,7 @@ void insert_clave(char *clave, char *fichero_salida){
   FILE *fich;
   if((fich = fopen(fichero_salida, "w"))==NULL){
     perror("[Controlador] Error. Fichero de salida no encontrado!");
-    exit(1);
+    end_program(1);//exit(1);
   }
   fprintf(fich,"%s",clave);
   fclose(fich);
@@ -149,10 +165,16 @@ void SIGCHLD_callback(int sig){
               }
               DEBUG_MSG("Success\n");
               end_program(0);
-            case 1:
-              break; //No se ha encontrado la clave. NO es un Error
+            case 1: ;
+              int shutdown=config.proc_reventador;
+              for(int i=0; i<config.proc_reventador; i++){
+                if(child[i].state=0){
+                  shutdown--;
+                }
+              }
+              if(shutdown==0)end_program(1);
             case -1:
-              exit(1);
+              end_program(1);
             default:
               break;
 
@@ -195,11 +217,45 @@ void end_program(int state){
           }
         }
       }
+      remove(lock_name);
     default:
       exit(1);
+      remove(lock_name);
   }
   exit(1);
 }
+int lock_program(char *file, int timeout, int max_retry){
+  lock_name=calloc((strlen(file)+5), sizeof(char));
+  memcpy(lock_name, file, strlen(file));
+  char lock[]=".lock";
+  strncat(lock_name, lock, 6);
+  DEBUG_MSG("El fichero de bloqueo es: %s\n", lock_name);
+  FILE *fich;
+  for(int retry=0; retry <max_retry; retry++){
+    if((fich=fopen(lock_name, "wx"))==NULL){
+      DEBUG_MSG("Retry number %d\n", (retry+1));
+      sleep(timeout);
+    }
+    else{
+      return 0;
+    }
+  }
+  return 1;
+}
+static void termination(int signum){
+  fflush(stdout); //Change! Signal Handler should do the bare minimum, set a flag or something, but not ffslush or allocate memory or anything like that
+  switch(signum){
+    case SIGINT:  //Program Interrupt Ctrl+c
+      DEBUG_MSG("Se ha producido un SIGINT");
+      end_program(1);
+      break;
+    case SIGTERM:
+      DEBUG_MSG("Se ha producido un SIGTERM, cerramos todo");
+      end_program(1);
+      break;
+  }
+}
+
 int LoadConfig(int argc, char *argv[], struct Config *config){
   /*Esta funcion comprueba que todos los datos sean metidos
   , y los guarda en config
