@@ -68,6 +68,7 @@ int main(int argc, char * argv[]){
         perror("Execl no ha creado un nuevo hijo.\n");
         end_program(1);  //Deberia notificar al proceso padre para decirle que no estoy haciendo lo que deberia...
       default:
+        child[i].state=1; //Set to on;
         posiciones[0]=posiciones[1];
         if((dict_div*(i+3))>=dict_size){posiciones[1]=dict_size;}
         else posiciones[1]=ret_next_line(config.f_claves, dict_div*(i+2), dict_size);
@@ -139,13 +140,21 @@ void SIGCHLD_callback(int sig){
         if(WIFEXITED(e)){
           //En este caso, el programa termino con exito
           DEBUG_MSG("Child exited with RC=%d\n",WEXITSTATUS(e));
-          if(WEXITSTATUS(e)==0){
-            //Exito al encontrar las claves!!!
-
-          }
           switch (WEXITSTATUS(e)) {
             case 0:
+              for(int i=0; i<config.proc_reventador; i++){
+                if(child[i].pid==pid_hijo_zombie){
+                  child[i].state=0; //off
+                }
+              }
+              DEBUG_MSG("Success\n");
               end_program(0);
+            case 1:
+              break; //No se ha encontrado la clave. NO es un Error
+            case -1:
+              exit(1);
+            default:
+              break;
 
           }
         }
@@ -179,9 +188,11 @@ void end_program(int state){
     case 0:
       DEBUG_MSG("Exito\n");
       for(int i=0; i<config.proc_reventador; i++){
-        if(kill(child[i].pid, SIGTERM)==-1){
-          fprintf(stderr, "Error haciendo avada kedavra de hijo num: %d", i);
-          perror("");
+        if(child[i].state!=0){
+          if(kill(child[i].pid, SIGTERM)==-1){
+            fprintf(stderr, "Error haciendo avada kedavra de hijo num: %d", i);
+            perror("");
+          }
         }
       }
     default:
