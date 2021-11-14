@@ -40,12 +40,13 @@ long ret_next_line(char *file, long pos, long dict_size);
 void end_program(int state);
 int LoadConfig(int argc, char *argv[], struct Config *config);
 int lock_program(char *file, int timeout, int max_retry);
-static void signal_handler(int sig);
+void SIGCHLD_callback(int sig);
+static void termination(int signum);
 int main(int argc, char * argv[]){
-  /*if (signal(SIGTERM, termination)==SIG_ERR){
+  if (signal(SIGTERM, termination)==SIG_ERR){
     perror("[main] An error ocurred while setting the signal handler.\n");
     exit(-1);
-  }*/
+  }
   if(lock_program(argv[0], LOCK_TEST_TIMEOUT, LOCK_RETRY_TRY)){
     fflush(stdout); //Ya sabemos que el fichero esta ahi. No necesitamos esa info.
     perror("Program already being executed\n");
@@ -60,11 +61,7 @@ int main(int argc, char * argv[]){
   char pos_1[20];
 
   DEBUG_MSG("El tamaño del diccionario es %ld y el primer segmento termina en %ld \n", dict_size, dict_div);
-  /*if (signal(SIGCHLD, SIGCHLD_callback)==SIG_ERR){
-    perror("[main] An error ocurred while setting the signal handler for children.\n");
-    exit(-1);
-  }*/
-  if ((signal(SIGCHLD, signal_handler)==SIG_ERR)|(signal(SIGINT, signal_handler)==SIG_ERR)|(signal(SIGTERM, signal_handler)==SIG_ERR)){
+  if (signal(SIGCHLD, SIGCHLD_callback)==SIG_ERR){
     perror("[main] An error ocurred while setting the signal handler for children.\n");
     exit(-1);
   }
@@ -108,6 +105,23 @@ void insert_clave(char *clave, char *fichero_salida){
   fprintf(fich,"%s",clave);
   fclose(fich);
 }
+
+/*int contar_palabras(char *fichero){
+  int count = 0;
+  char aux[80] ;
+  FILE *fich;
+  //fich = fopen(fichero, "r");
+
+  if((fich=fopen(fichero, "r"))!=NULL){
+    while(fscanf(fich, "%c", aux) != EOF){
+      count++;
+    }
+  }else{
+    //printf("no su pudo abrir el diccionario");
+    DEBUG_MSG("No se pudo abrir el diccionario");
+  }
+  return count;
+}   //Change! Deprecated. Change to file_length*/
 long file_length(char *file){
   FILE *fich;
   if((fich=fopen(file, "r"))==NULL){
@@ -131,6 +145,64 @@ long ret_next_line(char *file, long pos, long dict_size){
   fclose(fich);
   return pos;
 }
+void SIGCHLD_callback(int sig){
+  pid_t pid_hijo_zombie;
+  int e;
+  if(sig){
+    do{
+      pid_hijo_zombie=wait3(&e, WNOHANG, NULL);
+      if(pid_hijo_zombie > (pid_t) 0 && (WIFEXITED(e) || WIFSIGNALED(e))){
+        if(WIFEXITED(e)){
+          //En este caso, el programa termino con exito
+          DEBUG_MSG("Child exited with RC=%d\n",WEXITSTATUS(e));
+          switch (WEXITSTATUS(e)) {
+            case 0:
+              for(int i=0; i<config.proc_reventador; i++){
+                if(child[i].pid==pid_hijo_zombie){
+                  child[i].state=0; //off
+                }
+              }
+              DEBUG_MSG("Success\n");
+              end_program(0);
+            case 1: ;
+              int shutdown=config.proc_reventador;
+              for(int i=0; i<config.proc_reventador; i++){
+                if(child[i].state=0){
+                  shutdown--;
+                }
+              }
+              if(shutdown==0)end_program(1);
+            case -1:
+              end_program(1);
+            default:
+              break;
+
+          }
+        }
+      }
+    }while(pid_hijo_zombie > (pid_t) 0);
+  }
+}
+
+/*long dividir(int divisor, char *fichero){ //Change! Deprecated. Change to ret_next_line
+  if (divisor == 2493838){
+    return divisor;
+  }
+  FILE *fich;
+
+  if((fich = fopen(fichero, "r"))!=NULL){
+    fseek(fich, divisor, SEEK_SET);
+    while(fgetc(fich) != '\n'){
+
+    }
+
+  }else{
+    //printf("no su pudo abrir el diccionario");
+    DEBUG_MSG("No se pudo abrir el diccionario");
+  }
+  return ftell(fich);
+}*/
+
 void end_program(int state){
   //Kill all children and kill ourselves Avada Kedavra
   switch (state) {
@@ -146,8 +218,8 @@ void end_program(int state){
       }
       remove(lock_name);
     default:
-      remove(lock_name);
       exit(1);
+      remove(lock_name);
   }
   exit(1);
 }
@@ -169,47 +241,17 @@ int lock_program(char *file, int timeout, int max_retry){
   }
   return 1;
 }
-static void signal_handler(int sig){
-  switch(sig){
-    case SIGINT:
-      DEBUG_MSG("Se ha producido un SIGINT\n");
+static void termination(int signum){
+  fflush(stdout); //Change! Signal Handler should do the bare minimum, set a flag or something, but not ffslush or allocate memory or anything like that
+  switch(signum){
+    case SIGINT:  //Program Interrupt Ctrl+c
+      DEBUG_MSG("Se ha producido un SIGINT");
       end_program(1);
       break;
     case SIGTERM:
-      DEBUG_MSG("Se ha producido un SIGTERM, cerramos todo\n");
+      DEBUG_MSG("Se ha producido un SIGTERM, cerramos todo");
       end_program(1);
       break;
-    case SIGCHLD:
-      DEBUG_MSG("Un hijo a producido una llamada al sistema\n");
-      pid_t pid_hijo;
-      int e;
-      do{
-        pid_hijo=wait3(&e, WNOHANG, NULL);
-        if(pid_hijo>(pid_t) 0 && (WIFEXITED(e) || WIFSIGNALED(e))){//WIFEXITED -> Terminacion normal WIFSIGNALED -> Terminacion por señal
-          if(WIFEXITED(e)){//Terminacion normal
-            int shutdown=0;
-            for(int i=0; i<config.proc_reventador; i++){
-              if(child[i].pid==pid_hijo){
-                child[i].state=0; //off. Con esta funcion nos aseguramos de que el programa no intenta matar despues a un proceso que no esta vivo
-              }
-              shutdown = shutdown | child[i].state; //Luego haremos el ! de tal forma que si hay algun hijo vivo, esto no se apague, a no ser que haya habido un exito
-            }
-            switch(WEXITSTATUS(e)){ //Miramos salidas
-              case 0:
-                DEBUG_MSG("Success\n");
-                end_program(0);
-              case 1:
-                DEBUG_MSG("Un hijo a terminado sin exito\n");
-                if(!shutdown){//Si no hay ningun hijo vivo, apagamos todo y nos vamos
-                  end_program(1);
-                }
-              case -1:
-                DEBUG_MSG("Se ha producido un error grave\n");
-                end_program(1);
-            }
-          }
-        }
-      }while(pid_hijo > (pid_t) 0);
   }
 }
 

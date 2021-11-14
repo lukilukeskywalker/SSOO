@@ -8,7 +8,7 @@ Entrada: 5 arg
 
 Have fun!
 */
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DEBUG_MSG(...) printf("PID: %d ", pid);printf(__VA_ARGS__)
 #else
@@ -123,10 +123,10 @@ static void termination(int signum){
   DEBUG_MSG("Child Process %d needs to terminate", pid);
   switch(signum){
     case SIGINT:  //Program Interrupt Ctrl+c
-      DEBUG_MSG("Se ha producido un SIGINT, omitimos\n");
+      DEBUG_MSG("Se ha producido un SIGINT, omitimos");
       break;
     case SIGTERM:
-      DEBUG_MSG("Se ha producido un SIGTERM, cerramos todo\n");
+      DEBUG_MSG("Se ha producido un SIGTERM, cerramos todo");
       exit(1);
       break;
 
