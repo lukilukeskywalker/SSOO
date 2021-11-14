@@ -42,10 +42,6 @@ int LoadConfig(int argc, char *argv[], struct Config *config);
 int lock_program(char *file, int timeout, int max_retry);
 static void signal_handler(int sig);
 int main(int argc, char * argv[]){
-  /*if (signal(SIGTERM, termination)==SIG_ERR){
-    perror("[main] An error ocurred while setting the signal handler.\n");
-    exit(-1);
-  }*/
   if(lock_program(argv[0], LOCK_TEST_TIMEOUT, LOCK_RETRY_TRY)){
     fflush(stdout); //Ya sabemos que el fichero esta ahi. No necesitamos esa info.
     perror("Program already being executed\n");
@@ -60,12 +56,8 @@ int main(int argc, char * argv[]){
   char pos_1[20];
 
   DEBUG_MSG("El tamaño del diccionario es %ld y el primer segmento termina en %ld \n", dict_size, dict_div);
-  /*if (signal(SIGCHLD, SIGCHLD_callback)==SIG_ERR){
-    perror("[main] An error ocurred while setting the signal handler for children.\n");
-    exit(-1);
-  }*/
   if ((signal(SIGCHLD, signal_handler)==SIG_ERR)|(signal(SIGINT, signal_handler)==SIG_ERR)|(signal(SIGTERM, signal_handler)==SIG_ERR)){
-    perror("[main] An error ocurred while setting the signal handler for children.\n");
+    perror("[main] An error ocurred while setting the signal handler.\n");
     exit(-1);
   }
 
