@@ -40,7 +40,6 @@ long ret_next_line(char *file, long pos, long dict_size);
 void end_program(int state);
 int LoadConfig(int argc, char *argv[], struct Config *config);
 int lock_program(char *file, int timeout, int max_retry);
-sigset_t enmascarar(int sig);
 static void signal_handler(int sig);
 int main(int argc, char * argv[]){
   if(lock_program(argv[0], LOCK_TEST_TIMEOUT, LOCK_RETRY_TRY)){
@@ -88,10 +87,11 @@ int main(int argc, char * argv[]){
         end_program(1);  //Deberia notificar al proceso padre para decirle que no estoy haciendo lo que deberia...
       default:
         child[i].state=1; //Set to on;
+        sigprocmask(SIG_UNBLOCK, &mascara, NULL); //Desbloqueamos interrupciones
         posiciones[0]=posiciones[1];
         if((dict_div*(i+3))>=dict_size){posiciones[1]=dict_size;}
         else posiciones[1]=ret_next_line(config.f_claves, dict_div*(i+2), dict_size);
-        sigprocmask(SIG_UNBLOCK, &mascara, NULL); //Desbloqueamos interrupciones
+        
     }
   }
   //All kidos have been created. Now wait until they end
@@ -213,14 +213,6 @@ static void signal_handler(int sig){
         }
       }while(pid_hijo > (pid_t) 0);
   }
-}
-sigset_t enmascarar(int sig){
-  sigset_t mascara;
-  sigset_t antigua;
-  sigemptyset (&mascara);
-  sigaddset (&mascara, sig);
-  sigprocmask(SIG_BLOCK, &mascara, &antigua);
-  return antigua;
 }
 
 int LoadConfig(int argc, char *argv[], struct Config *config){
