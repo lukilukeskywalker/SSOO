@@ -40,6 +40,7 @@ long ret_next_line(char *file, long pos, long dict_size);
 void end_program(int state);
 int LoadConfig(int argc, char *argv[], struct Config *config);
 int lock_program(char *file, int timeout, int max_retry);
+sigset_t enmascarar(int sig);
 static void signal_handler(int sig);
 int main(int argc, char * argv[]){
   if(lock_program(argv[0], LOCK_TEST_TIMEOUT, LOCK_RETRY_TRY)){
@@ -55,16 +56,24 @@ int main(int argc, char * argv[]){
   char pos_0[20];
   char pos_1[20];
 
+  //Creamos mascara;
+  //sigset_t mascara=enmascarar(int SIGCHLD);
   DEBUG_MSG("El tamaño del diccionario es %ld y el primer segmento termina en %ld \n", dict_size, dict_div);
   if ((signal(SIGCHLD, signal_handler)==SIG_ERR)|(signal(SIGINT, signal_handler)==SIG_ERR)|(signal(SIGTERM, signal_handler)==SIG_ERR)){
     perror("[main] An error ocurred while setting the signal handler.\n");
     exit(-1);
   }
-
+  sigset_t mascara;
+  sigemptyset(&mascara);
+  sigaddset(&mascara, SIG_ERR);
+  sigaddset(&mascara, SIGINT);
+  sigaddset(&mascara, SIGTERM); //Creamos mascara para deshabilitar interrupciones en segmentos criticos.
+  
   DEBUG_MSG("[Controlador][Main] Iniciamos la creacion de Hijos\n");
   pid_t pid_hijo;
   insert_clave(config.MD5key, config.exit_file);
   for(int i=0; i< config.proc_reventador; i++){
+    sigprocmask(SIG_BLOCK, &mascara, NULL); //Bloqueamos interrupciones
     switch (child[i].pid = fork()) {
       case (pid_t)-1:
         //perror("Error en la creacion de hijo num %d", i);
@@ -82,6 +91,7 @@ int main(int argc, char * argv[]){
         posiciones[0]=posiciones[1];
         if((dict_div*(i+3))>=dict_size){posiciones[1]=dict_size;}
         else posiciones[1]=ret_next_line(config.f_claves, dict_div*(i+2), dict_size);
+        sigprocmask(SIG_UNBLOCK, &mascara, NULL); //Desbloqueamos interrupciones
     }
   }
   //All kidos have been created. Now wait until they end
@@ -203,6 +213,14 @@ static void signal_handler(int sig){
         }
       }while(pid_hijo > (pid_t) 0);
   }
+}
+sigset_t enmascarar(int sig){
+  sigset_t mascara;
+  sigset_t antigua;
+  sigemptyset (&mascara);
+  sigaddset (&mascara, sig);
+  sigprocmask(SIG_BLOCK, &mascara, &antigua);
+  return antigua;
 }
 
 int LoadConfig(int argc, char *argv[], struct Config *config){
