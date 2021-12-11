@@ -205,6 +205,7 @@ static void signal_handler(int sig){
                 if(!shutdown){//Si no hay ningun hijo vivo, apagamos todo y nos vamos
                   end_program(1);
                 }
+                break;	
               case -1:
                 DEBUG_MSG("Se ha producido un error grave\n");
                 end_program(1);
