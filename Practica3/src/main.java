@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -27,7 +28,7 @@ public class main {
 	static private int num_vol=3;	//Segun enunciado al principio 3, despues el numero que se meta
 	static private int num_receptores=3;
 	static private int num_tareas_max=25;
-	private AtomicInteger proc_activos = new AtomicInteger();
+	private static Semaphore proc_activos;
 	
 	private static BufferedReader objReader = null;
 	private static PrintWriter objWriter = null;
@@ -43,8 +44,12 @@ public class main {
 		ReentrantLock TTP_lock=new ReentrantLock();
 
 		Thread[] generadores = new Thread[num_gen];//List<Thread> generadores = new ArrayList<Thread>();
+		proc_activos=new Semaphore(num_tareas_max-num_receptores, true);	//La pregunta del millon es... cuantos procesos dejamos que entren en la cola CTE
+		/*Juego de logica: Para ver cuantos proc_activos permito, supongamos que cada numero de voluntarios es capaz de finalizar 1 Tarea erroneamente
+		 * reintroduciendola en CTE. Entonces pueden acoger otra tarea que estuviera finalizada, que otra vez podria tratar de reintroducir en CTE,
+		 * pero en ese caso CTE ya habria reducido el numero de tareas por 1+num_recptores... creo*/
 		for(int i=0; i < num_gen; i++) {
-			Generador genTareas = new Generador(objReader, CTE);
+			Generador genTareas = new Generador(objReader, CTE, proc_activos);
 			generadores[i]=new Thread(genTareas);//genTareas.start();//Fail, runnable no implementa el metodo start. El metodo start se implementa en thread
 			generadores[i].setName("Generador-"+i);
 			generadores[i].start();//generadores.add(genTareas);
@@ -60,7 +65,7 @@ public class main {
 		debug("Se han creado los "+num_dist+" distribuidores");
 		Thread[] receptores = new Thread[num_receptores];//List<Receptor> receptores = new ArrayList<Receptor>();
 		for(int i=0; i < num_receptores; i++) {
-			Receptor recpTareas = new Receptor(objWriter, CTE, TTP, TTP_lock, CR, num_vol);
+			Receptor recpTareas = new Receptor(objWriter, CTE, proc_activos, TTP, TTP_lock, CR, num_vol);
 			receptores[i]=new Thread(recpTareas);//recpTareas.run();
 			receptores[i].setName("Receptor-"+i);
 			receptores[i].start();//receptores.add(recpTareas);			

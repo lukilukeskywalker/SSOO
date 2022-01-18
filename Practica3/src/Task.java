@@ -39,8 +39,8 @@ public class Task {
 		this.sub_id=subId;
 	}
 	public String toString() {
-		if(this.status == State.DONE)return "SUB_ID"+ sub_id +" TaskID: " + id + " Dato: " +data+ " Resultado: "+ resultado +" Estado: "+ status;
-		return "TaskID: " + id + " Dato: " +data+ " Estado: "+ this.status;
+		if(this.status == State.DONE)return " TaskID: " + id + " Dato: " +data+ " Resultado: "+ resultado +" Estado: "+ status;
+		return "SUB_ID"+ sub_id +"TaskID: " + id + " Dato: " +data+ " Estado: "+ this.status;
 	}
 	public int setVoluntarios(int voluntarios) {
 		return this.voluntarios_act=voluntarios;

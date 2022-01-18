@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 //public class Generador extends Thread{ //https://stackoverflow.com/questions/15471432/why-implements-runnable-is-preferred-over-extends-thread
@@ -9,11 +10,12 @@ public class Generador implements Runnable{
 	static final boolean debug_en=true;
 	private BufferedReader objReader = null;
 	private final BlockingQueue<Task> queue;
-	private AtomicInteger proc_activos;
+	private Semaphore proc_activos;//private AtomicInteger proc_activos;
 	private int timeout;
 	
-	public Generador(BufferedReader objReader, BlockingQueue<Task> queue) {
+	public Generador(BufferedReader objReader, BlockingQueue<Task> queue, Semaphore proc_activos) {
 		//Thread.currentThread().setName(threadName);
+		this.proc_activos=proc_activos;
 		this.queue=queue;
 		this.timeout=60;
 		this.objReader=objReader;
@@ -23,10 +25,11 @@ public class Generador implements Runnable{
 		//synchronized(objReader) {//BufferedReader esta sincronizado con sigo mismo
 		try {
 			while(( trabajo_pendiente = objReader.readLine())!=null) {
+				this.proc_activos.acquire();//Decrementa el contador de tareas que pueden entrar en CTE. Si es 0 se queda esperando
 				Task trabajo = new Task(trabajo_pendiente);
 				this.setJob(trabajo);
 				this.debug(trabajo.toString());
-				TimeUnit.SECONDS.sleep(5);
+				TimeUnit.SECONDS.sleep(1);
 				//this.queue.offer(trabajo, timeout, TimeUnit.SECONDS);
 			}
 		}catch(IOException e) {

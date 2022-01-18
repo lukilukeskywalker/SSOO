@@ -1,16 +1,16 @@
-Receptor-0: Receptor-1: Receptor-1: Receptor-2: Receptor-2: Receptor-1: SUB_ID-1 TaskID: 0 Dato: A1 Resultado: 2064 Estado: DONE
-Receptor-2: Receptor-1: Receptor-0: SUB_ID-1 TaskID: 1 Dato: B1 Resultado: 2095 Estado: DONE
-Receptor-2: Receptor-1: Receptor-1: Receptor-1: Receptor-0: Receptor-1: Receptor-0: Receptor-1: Receptor-1: Receptor-2: Receptor-1: Receptor-0: SUB_ID-1 TaskID: 2 Dato: C1 Resultado: 2126 Estado: DONE
-Receptor-2: Receptor-0: Receptor-1: SUB_ID-1 TaskID: 3 Dato: D1 Resultado: 2157 Estado: DONE
-Receptor-0: Receptor-2: Receptor-0: SUB_ID-1 TaskID: 4 Dato: E1 Resultado: 2188 Estado: DONE
-Receptor-0: Receptor-0: Receptor-2: SUB_ID-1 TaskID: 5 Dato: F1 Resultado: 2219 Estado: DONE
-Receptor-1: Receptor-0: Receptor-0: Receptor-0: Receptor-2: Receptor-1: SUB_ID-1 TaskID: 7 Dato: H1 Resultado: 2281 Estado: DONE
-Receptor-0: Receptor-2: Receptor-1: SUB_ID-1 TaskID: 6 Dato: G1 Resultado: 2250 Estado: DONE
-Receptor-0: Receptor-2: Receptor-2: Receptor-1: Receptor-2: Receptor-0: Receptor-1: Receptor-1: Receptor-2: Receptor-1: Receptor-0: Receptor-2: SUB_ID-1 TaskID: 9 Dato: B2 Resultado: 2096 Estado: DONE
-Receptor-1: Receptor-1: Receptor-0: SUB_ID-1 TaskID: 8 Dato: A2 Resultado: 2065 Estado: DONE
-Receptor-2: Receptor-0: Receptor-0: Receptor-0: Receptor-0: SUB_ID-1 TaskID: 11 Dato: D2 Resultado: 2158 Estado: DONE
-Receptor-1: Receptor-2: Receptor-0: Receptor-1: SUB_ID-1 TaskID: 10 Dato: C2 Resultado: 2127 Estado: DONE
-Receptor-2: Receptor-2: Receptor-0: Receptor-0: Receptor-1: Receptor-2: SUB_ID-1 TaskID: 13 Dato: F2 Resultado: 2220 Estado: DONE
-Receptor-0: Receptor-1: Receptor-1: SUB_ID-1 TaskID: 12 Dato: E2 Resultado: 2189 Estado: DONE
-Receptor-0: Receptor-2: Receptor-2: SUB_ID-1 TaskID: 14 Dato: G2 Resultado: 2251 Estado: DONE
-Receptor-0: Receptor-1: Receptor-2: SUB_ID-1 TaskID: 15 Dato: H2 Resultado: 2282 Estado: DONE
+Receptor-0: Receptor-1: Receptor-2:  TaskID: 0 Dato: A1 Resultado: 2064 Estado: DONE
+Receptor-0: Receptor-1: Receptor-2:  TaskID: 1 Dato: B1 Resultado: 2095 Estado: DONE
+Receptor-0: Receptor-1: Receptor-0: Receptor-1: Receptor-0:  TaskID: 2 Dato: C1 Resultado: 2126 Estado: DONE
+Receptor-2: Receptor-1: Receptor-0: Receptor-2:  TaskID: 3 Dato: D1 Resultado: 2157 Estado: DONE
+Receptor-1: Receptor-0: Receptor-2: Receptor-0: Receptor-2: Receptor-1:  TaskID: 4 Dato: E1 Resultado: 2188 Estado: DONE
+Receptor-0: Receptor-2: Receptor-0:  TaskID: 5 Dato: F1 Resultado: 2219 Estado: DONE
+Receptor-1: Receptor-1: Receptor-1:  TaskID: 6 Dato: G1 Resultado: 2250 Estado: DONE
+Receptor-1: Receptor-0: Receptor-2:  TaskID: 7 Dato: H1 Resultado: 2281 Estado: DONE
+Receptor-1: Receptor-1: Receptor-1: Receptor-1: Receptor-2: Receptor-0: Receptor-1: Receptor-1: Receptor-0: Receptor-2: Receptor-2: Receptor-0:  TaskID: 9 Dato: B2 Resultado: 2096 Estado: DONE
+Receptor-1: Receptor-2: Receptor-2:  TaskID: 8 Dato: A2 Resultado: 2065 Estado: DONE
+Receptor-1: Receptor-2: Receptor-2: Receptor-0: Receptor-1:  TaskID: 11 Dato: D2 Resultado: 2158 Estado: DONE
+Receptor-2: Receptor-0: Receptor-0: Receptor-1: Receptor-0: Receptor-2: Receptor-1:  TaskID: 10 Dato: C2 Resultado: 2127 Estado: DONE
+Receptor-0: Receptor-0: Receptor-1: Receptor-2: Receptor-0: Receptor-2: Receptor-0: Receptor-1: Receptor-2: Receptor-0: Receptor-1: Receptor-2:  TaskID: 13 Dato: F2 Resultado: 2220 Estado: DONE
+Receptor-1: Receptor-0: Receptor-2:  TaskID: 12 Dato: E2 Resultado: 2189 Estado: DONE
+Receptor-1: Receptor-1: Receptor-2: Receptor-1: Receptor-0: Receptor-2: Receptor-1: Receptor-0: Receptor-2: Receptor-2:  TaskID: 14 Dato: G2 Resultado: 2251 Estado: DONE
+Receptor-1: Receptor-2: Receptor-1: Receptor-0: Receptor-2: Receptor-1: Receptor-2: Receptor-0: Receptor-1: Receptor-2: Receptor-0:  TaskID: 15 Dato: H2 Resultado: 2282 Estado: DONE
