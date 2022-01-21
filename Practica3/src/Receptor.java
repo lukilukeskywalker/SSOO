@@ -1,3 +1,4 @@
+//Proyecto SETI por Lukas Gdanietz y Manuel Infantes
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -18,6 +19,16 @@ public class Receptor implements Runnable{
 	private final BlockingQueue<Task_Activo> CR;
 	private int num_vol=3;
 	private PrintWriter objwriter;
+	/**
+	*Constructor Receptor 
+	*@param objwriter Objeto de escritutra en fichero de salida
+	*@param CTE Hilo al que reintroducir la tarea fallida
+	*@param proc_activos Semaforo para permitir el acceso a CTE en Generador
+	*@param TTP Tabla de procesos activos
+	*@param lock Locl para bloquear la lectura u escritura de TTP
+	*@param CR Cola de tareas con resultado, donde meteran los voluntarios su resultado
+	*@param num_vol numero de voluntarios por tarea
+	*/
 	public Receptor(PrintWriter objwriter, BlockingQueue<Task> CTE, Semaphore proc_activos, Map<Integer, Task_Activo> TTP, ReentrantLock lock, BlockingQueue<Task_Activo> CR, int num_vol) {
 		this.objwriter = objwriter;
 		this.CTE=CTE;

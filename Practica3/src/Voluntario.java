@@ -1,3 +1,4 @@
+//Proyecto SETI por Lukas Gdanietz y Manuel Infantes
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -6,6 +7,13 @@ public class Voluntario extends Analizador implements Runnable{
 	private final BlockingQueue<Task_Activo> CR;
 	private Task_Activo task;
 	final private int timeout=60;
+	/**
+	*Constructor Genera un Voluntario
+	*@param CR COla de tareas con resultado, donde meteran los voluntarios su resultado
+	*@param retardo Retardo
+	*@param probFallo probabilidad de fallo
+	*@param num_vol Numero de voluntarios
+	*/
 	public Voluntario(Task_Activo task,BlockingQueue<Task_Activo> CR, long retardo, int probFallo) {
 		// TODO Auto-generated constructor stub
 		super(retardo, probFallo);

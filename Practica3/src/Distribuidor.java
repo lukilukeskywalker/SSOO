@@ -1,3 +1,4 @@
+//Proyecto SETI por Lukas Gdanietz y Manuel Infantes
 import java.io.BufferedReader;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -15,7 +16,14 @@ public class Distribuidor implements Runnable{
 	private final BlockingQueue<Task_Activo> CR;
 	private int num_vol=3;	//Esto me molesta... Al principio del problema se dicen 3, en la fase 2 se dice tantos como digan los argumentos
 	
-	
+	/**
+	*Constructor Genera un distribuidor
+	*@param CTE Hilo de entrada
+	*@param TTP Tabla de procesos activos
+	*@param lock Lock para bloquear la lectura o escritura de TTP
+	*@param CR Cola de tareas con resultado, donde meteran los voluntarios su resultado
+	*@param num_vol Numero de voluntarios
+	*/
 	public Distribuidor(BlockingQueue<Task> CTE, Map<Integer, Task_Activo> TTP, ReentrantLock lock, BlockingQueue<Task_Activo> CR, int num_vol) {
 		// TODO Auto-generated constructor stub
 		this.CTE=CTE;

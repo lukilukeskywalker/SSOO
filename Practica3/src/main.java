@@ -1,3 +1,5 @@
+//Proyecto SETI por Lukas Gdanietz y Manuel Infantes
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -93,12 +95,12 @@ public class main {
 			return false;
 		}
 		if(args.length >= 6) {
-			num_gen=Integer.parseInt(args[3]);
-			num_dist=Integer.parseInt(args[4]);
-			num_receptores=Integer.parseInt(args[5]);
-			num_vol=Integer.parseInt(args[6]);
+			num_gen=Integer.parseInt(args[2]);
+			num_dist=Integer.parseInt(args[3]);
+			num_receptores=Integer.parseInt(args[4]);
+			num_vol=Integer.parseInt(args[5]);
 			if(args.length==7) {
-				num_tareas_max=Integer.parseInt(args[7]);
+				num_tareas_max=Integer.parseInt(args[6]);
 			}
 		}
 		entrada=args[0];

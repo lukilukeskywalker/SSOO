@@ -1,3 +1,5 @@
+//Proyecto SETI por Lukas Gdanietz y Manuel Infantes
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -5,7 +7,10 @@ public class Task{
 	private static AtomicInteger gen = new AtomicInteger();
 	public int id;
 	public String data;
-	
+	/**
+	*Constructor Genera una tarea
+	*@param trabajo String con el objetivo del trabajo
+	*/
 	public Task(String trabajo) {
 		this.data=trabajo;
 		this.id=gen.getAndIncrement();
@@ -13,6 +18,10 @@ public class Task{
 	protected Task(int id, String trabajo) {
 		this.data=trabajo;
 		this.id=id;
+	}
+	public String toString() {
+		
+		return"TaskID: " + id + " Dato: " +data;
 	}
 /*enum State{
 		NEW,

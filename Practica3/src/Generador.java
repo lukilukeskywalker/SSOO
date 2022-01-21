@@ -1,3 +1,4 @@
+//Proyecto SETI por Lukas Gdanietz y Manuel Infantes
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
